@@ -218,7 +218,69 @@ export default function StoresManager() {
 
       {/* Stores Table */}
       <div className="bg-white shadow-md overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile Card View */}
+        <div className="block md:hidden divide-y divide-gray-200">
+          {filteredStores.length === 0 ? (
+            <div className="px-6 py-12 text-center text-gray-500">
+              {searchTerm ? 'No stores found matching your search.' : 'No stores yet. Add your first store!'}
+            </div>
+          ) : (
+            filteredStores.map((store) => (
+              <div key={store.id} className="p-4 hover:bg-gray-50">
+                <div className="flex items-start gap-4">
+                  <div className="w-16 h-16 flex-shrink-0 flex items-center justify-center border border-gray-200 p-2">
+                    {store.logoUrl ? (
+                      <img 
+                        src={store.logoUrl} 
+                        alt={store.name}
+                        className="max-w-full max-h-full object-contain"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.parentElement.innerHTML = '<span class="text-2xl text-gray-400">' + store.name.charAt(0) + '</span>';
+                        }}
+                      />
+                    ) : (
+                      <span className="text-2xl text-gray-400">{store.name.charAt(0)}</span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 mb-1">{store.name}</h3>
+                    {store.description && (
+                      <p className="text-sm text-gray-600 mb-2">{store.description}</p>
+                    )}
+                    {store.website && (
+                      <a 
+                        href={store.website} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary hover:underline"
+                      >
+                        Visit Website
+                      </a>
+                    )}
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-4">
+                  <button
+                    onClick={() => handleEdit(store)}
+                    className="flex-1 bg-primary hover:bg-primary-dark text-white font-semibold py-2 px-4 text-sm transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(store.id, store.name)}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 text-sm transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -304,8 +366,8 @@ export default function StoresManager() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-0 md:p-4">
+          <div className="bg-white w-full h-full md:max-w-2xl md:w-full md:h-auto md:max-h-[90vh] overflow-y-auto shadow-2xl md:rounded-lg">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b">
               <h3 className="text-2xl font-bold text-secondary">

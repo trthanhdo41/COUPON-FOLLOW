@@ -286,7 +286,77 @@ export default function CouponsManager() {
 
       {/* Coupons Table */}
       <div className="bg-white shadow-md overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile Card View */}
+        <div className="block md:hidden divide-y divide-gray-200">
+          {filteredCoupons.length === 0 ? (
+            <div className="px-6 py-12 text-center text-gray-500">
+              {searchTerm || filterStore ? 'No coupons found matching your filters.' : 'No coupons yet. Add your first coupon!'}
+            </div>
+          ) : (
+            filteredCoupons.map((coupon) => (
+              <div key={coupon.id} className="p-4 hover:bg-gray-50">
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center border border-gray-200 p-1">
+                    {coupon.storeLogoUrl ? (
+                      <img 
+                        src={coupon.storeLogoUrl} 
+                        alt={coupon.storeName}
+                        className="max-w-full max-h-full object-contain"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.parentElement.innerHTML = '<span class="text-xl text-gray-400">' + (coupon.storeName?.charAt(0) || '?') + '</span>';
+                        }}
+                      />
+                    ) : (
+                      <span className="text-xl text-gray-400">{coupon.storeName?.charAt(0) || '?'}</span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-gray-500 mb-1">{coupon.storeName}</p>
+                    <h3 className="font-semibold text-gray-900 mb-1">{coupon.title}</h3>
+                    {coupon.description && (
+                      <p className="text-sm text-gray-600 mb-2">{coupon.description}</p>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2 mb-3">
+                  {coupon.code ? (
+                    <span className="inline-flex items-center px-3 py-1 bg-gray-100 border border-gray-300 text-sm font-mono font-bold text-gray-800">
+                      {coupon.code}
+                    </span>
+                  ) : (
+                    <span className="text-sm text-gray-400">No code</span>
+                  )}
+                  <span className="text-sm font-semibold text-primary">{coupon.discount}</span>
+                  {coupon.exclusive && (
+                    <span className="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold">
+                      EXCLUSIVE
+                    </span>
+                  )}
+                </div>
+                
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEdit(coupon)}
+                    className="flex-1 bg-primary hover:bg-primary-dark text-white font-semibold py-2 px-4 text-sm transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(coupon.id, coupon.title)}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 text-sm transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -379,8 +449,8 @@ export default function CouponsManager() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-0 md:p-4">
+          <div className="bg-white w-full h-full md:max-w-3xl md:w-full md:h-auto md:max-h-[90vh] overflow-y-auto shadow-2xl md:rounded-lg">
             <div className="flex items-center justify-between p-6 border-b">
               <h3 className="text-2xl font-bold text-secondary">
                 {editingCoupon ? 'Edit Coupon' : 'Add New Coupon'}
