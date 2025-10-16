@@ -11,7 +11,7 @@ import {
   orderBy,
   serverTimestamp 
 } from 'firebase/firestore';
-import { FiPlus, FiEdit2, FiTrash2, FiX, FiSave, FiSearch, FiImage, FiAlertCircle } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiX, FiSave, FiSearch, FiImage, FiAlertCircle, FiUpload } from 'react-icons/fi';
 
 export default function StoresManager() {
   const [stores, setStores] = useState([]);

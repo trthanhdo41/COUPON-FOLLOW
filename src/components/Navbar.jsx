@@ -57,6 +57,12 @@ export default function Navbar() {
             >
               Saving Guides
             </Link>
+            <Link 
+              to="/contact" 
+              className="text-white hover:text-gray-200 transition-colors font-medium text-[15px]"
+            >
+              Contact
+            </Link>
           </div>
 
               {/* Search Bar */}
@@ -112,6 +118,7 @@ export default function Navbar() {
             <Link to="/stores" className="block px-3 py-2 text-base font-medium text-white hover:bg-primary">Stores</Link>
             <Link to="/cashback" className="block px-3 py-2 text-base font-medium text-white hover:bg-primary">Cashback</Link>
             <Link to="/saving-guides" className="block px-3 py-2 text-base font-medium text-white hover:bg-primary">Saving Guides</Link>
+            <Link to="/contact" className="block px-3 py-2 text-base font-medium text-white hover:bg-primary">Contact</Link>
                 <form onSubmit={handleSearch} className="px-3 py-2">
                   <input
                     type="text"

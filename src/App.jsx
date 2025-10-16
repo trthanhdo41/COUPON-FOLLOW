@@ -16,6 +16,8 @@ import Join from './pages/Join';
 import UserDashboard from './pages/UserDashboard';
 import TermsOfUse from './pages/TermsOfUse';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import ContactUs from './pages/ContactUs';
+import AboutUs from './pages/AboutUs';
 import AdminLogin from './admin/AdminLogin';
 import AdminDashboard from './admin/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -107,6 +109,20 @@ function App() {
                 <>
                   <Navbar />
                   <PrivacyPolicy />
+                  <Footer />
+                </>
+              } />
+              <Route path="/contact" element={
+                <>
+                  <Navbar />
+                  <ContactUs />
+                  <Footer />
+                </>
+              } />
+              <Route path="/about" element={
+                <>
+                  <Navbar />
+                  <AboutUs />
                   <Footer />
                 </>
               } />
