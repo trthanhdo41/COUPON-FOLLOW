@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { FiExternalLink, FiCopy, FiCheck, FiArrowLeft } from 'react-icons/fi';
+import ReviewsSystem from '../components/ReviewsSystem';
 
 export default function StoreDetail() {
   const { storeId } = useParams();
@@ -193,6 +194,13 @@ export default function StoreDetail() {
           </div>
         )}
       </div>
+
+      {/* Reviews Section */}
+      {store && (
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <ReviewsSystem storeId={storeId} storeName={store.name} />
+        </div>
+      )}
     </div>
   );
 }

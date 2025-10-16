@@ -8,6 +8,7 @@ import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import SEO from '../components/SEO';
 
 export default function Home() {
   const [topCoupons, setTopCoupons] = useState([]);
@@ -55,6 +56,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEO 
+        title="CouponFollow - Best Coupons, Deals & Cashback Offers"
+        description="Find the best coupons, deals, and cashback offers from thousands of stores. Save money on your favorite brands with verified coupon codes."
+        keywords="coupons, deals, cashback, discounts, savings, coupon codes, online shopping, best deals"
+      />
       {/* Today's Top Coupons - Swiper Carousel */}
       <div className="bg-gradient-to-b from-[#f8fafc] to-white pt-12 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
