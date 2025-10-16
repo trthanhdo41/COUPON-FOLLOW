@@ -11,14 +11,18 @@ import {
   orderBy,
   serverTimestamp 
 } from 'firebase/firestore';
-import { FiPlus, FiEdit2, FiTrash2, FiX, FiSave } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiX, FiSave, FiSearch, FiAlertCircle, FiTag } from 'react-icons/fi';
 
 export default function CouponsManager() {
   const [coupons, setCoupons] = useState([]);
+  const [filteredCoupons, setFilteredCoupons] = useState([]);
   const [stores, setStores] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStore, setFilterStore] = useState('');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState(null);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     storeId: '',
     storeName: '',
@@ -28,16 +32,35 @@ export default function CouponsManager() {
     code: '',
     discount: '',
     link: '',
+    exclusive: false,
     expiryDate: ''
   });
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    let filtered = coupons;
+    
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(coupon =>
+        coupon.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        coupon.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        coupon.code?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    if (filterStore) {
+      filtered = filtered.filter(coupon => coupon.storeId === filterStore);
+    }
+    
+    setFilteredCoupons(filtered);
+  }, [searchTerm, filterStore, coupons]);
+
   const fetchData = async () => {
     try {
-      // Fetch coupons
       const couponsQuery = query(collection(db, 'coupons'), orderBy('createdAt', 'desc'));
       const couponsSnapshot = await getDocs(couponsQuery);
       const couponsData = couponsSnapshot.docs.map(doc => ({
@@ -45,9 +68,10 @@ export default function CouponsManager() {
         ...doc.data()
       }));
       setCoupons(couponsData);
+      setFilteredCoupons(couponsData);
 
-      // Fetch stores for dropdown
-      const storesSnapshot = await getDocs(collection(db, 'stores'));
+      const storesQuery = query(collection(db, 'stores'), orderBy('name', 'asc'));
+      const storesSnapshot = await getDocs(storesQuery);
       const storesData = storesSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -57,6 +81,7 @@ export default function CouponsManager() {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
+      alert('Failed to load data. Please refresh the page.');
       setLoading(false);
     }
   };
@@ -64,31 +89,77 @@ export default function CouponsManager() {
   const handleStoreSelect = (storeId) => {
     const selectedStore = stores.find(s => s.id === storeId);
     if (selectedStore) {
-      setFormData({
-        ...formData,
+      setFormData(prev => ({
+        ...prev,
         storeId: storeId,
         storeName: selectedStore.name,
         storeLogoUrl: selectedStore.logoUrl || ''
-      });
+      }));
+      if (errors.storeId) {
+        setErrors(prev => ({ ...prev, storeId: '' }));
+      }
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.storeId) {
+      newErrors.storeId = 'Please select a store';
+    }
+    
+    if (!formData.title.trim()) {
+      newErrors.title = 'Title is required';
+    }
+    
+    if (!formData.discount.trim()) {
+      newErrors.discount = 'Discount is required';
+    }
+    
+    if (formData.link && !isValidUrl(formData.link)) {
+      newErrors.link = 'Please enter a valid URL';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const isValidUrl = (string) => {
+    try {
+      new URL(string);
+      return true;
+    } catch (_) {
+      return false;
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    if (!validateForm()) {
+      return;
+    }
+    
+    setSaving(true);
+    
     try {
+      const couponData = {
+        ...formData,
+        exclusive: Boolean(formData.exclusive)
+      };
+
       if (editingCoupon) {
-        // Update existing coupon
         await updateDoc(doc(db, 'coupons', editingCoupon.id), {
-          ...formData,
+          ...couponData,
           updatedAt: serverTimestamp()
         });
+        alert('Coupon updated successfully!');
       } else {
-        // Add new coupon
         await addDoc(collection(db, 'coupons'), {
-          ...formData,
+          ...couponData,
           createdAt: serverTimestamp()
         });
+        alert('Coupon added successfully!');
       }
       
       resetForm();
@@ -96,6 +167,8 @@ export default function CouponsManager() {
     } catch (error) {
       console.error('Error saving coupon:', error);
       alert('Error saving coupon. Please try again.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -110,15 +183,18 @@ export default function CouponsManager() {
       code: coupon.code || '',
       discount: coupon.discount || '',
       link: coupon.link || '',
+      exclusive: coupon.exclusive || false,
       expiryDate: coupon.expiryDate || ''
     });
+    setErrors({});
     setShowModal(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this coupon?')) {
+  const handleDelete = async (id, title) => {
+    if (window.confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
       try {
         await deleteDoc(doc(db, 'coupons', id));
+        alert('Coupon deleted successfully!');
         fetchData();
       } catch (error) {
         console.error('Error deleting coupon:', error);
@@ -137,93 +213,161 @@ export default function CouponsManager() {
       code: '',
       discount: '',
       link: '',
+      exclusive: false,
       expiryDate: ''
     });
     setEditingCoupon(null);
+    setErrors({});
     setShowModal(false);
   };
 
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <h2 className="text-3xl font-bold text-secondary">Manage Coupons</h2>
-          <p className="text-gray-600 mt-1">Add, edit, or remove coupon codes</p>
+          <p className="text-gray-600 mt-1">Total: {coupons.length} coupons</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="btn-primary flex items-center space-x-2"
+          className="flex items-center space-x-2 bg-primary hover:bg-primary-dark text-white px-6 py-3 font-semibold transition-colors shadow-md hover:shadow-lg"
         >
           <FiPlus size={20} />
-          <span>Add Coupon</span>
+          <span>Add New Coupon</span>
         </button>
       </div>
 
-      {/* Coupons Table */}
-      {loading ? (
-        <div className="card text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+      {/* Filters */}
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="relative">
+          <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <input
+            type="text"
+            placeholder="Search coupons by title, description, or code..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
         </div>
-      ) : (
-        <div className="card overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b-2 border-gray-200">
-                <th className="text-left py-4 px-4 font-semibold text-secondary">Store</th>
-                <th className="text-left py-4 px-4 font-semibold text-secondary">Title</th>
-                <th className="text-left py-4 px-4 font-semibold text-secondary">Code</th>
-                <th className="text-left py-4 px-4 font-semibold text-secondary">Discount</th>
-                <th className="text-left py-4 px-4 font-semibold text-secondary">Expiry</th>
-                <th className="text-right py-4 px-4 font-semibold text-secondary">Actions</th>
+        
+        <div>
+          <select
+            value={filterStore}
+            onChange={(e) => setFilterStore(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          >
+            <option value="">All Stores</option>
+            {stores.map(store => (
+              <option key={store.id} value={store.id}>{store.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Coupons Table */}
+      <div className="bg-white shadow-md overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Store</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody>
-              {coupons.length === 0 ? (
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredCoupons.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-8 text-gray-500">
-                    No coupons yet. Click "Add Coupon" to create one.
+                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                    {searchTerm || filterStore ? 'No coupons found matching your filters.' : 'No coupons yet. Add your first coupon!'}
                   </td>
                 </tr>
               ) : (
-                coupons.map((coupon) => (
-                  <tr key={coupon.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-4 px-4">
-                      <div className="flex items-center space-x-3">
-                        {coupon.storeLogoUrl && (
-                          <img src={coupon.storeLogoUrl} alt="" className="w-10 h-10 object-contain" />
-                        )}
-                        <span className="font-medium">{coupon.storeName}</span>
+                filteredCoupons.map((coupon) => (
+                  <tr key={coupon.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 flex items-center justify-center border border-gray-200 p-1">
+                          {coupon.storeLogoUrl ? (
+                            <img 
+                              src={coupon.storeLogoUrl} 
+                              alt={coupon.storeName}
+                              className="max-w-full max-h-full object-contain"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.parentElement.innerHTML = '<span class="text-xl text-gray-400">' + (coupon.storeName?.charAt(0) || '?') + '</span>';
+                              }}
+                            />
+                          ) : (
+                            <span className="text-xl text-gray-400">{coupon.storeName?.charAt(0) || '?'}</span>
+                          )}
+                        </div>
+                        <span className="text-sm font-medium text-gray-900">{coupon.storeName}</span>
                       </div>
                     </td>
-                    <td className="py-4 px-4 max-w-xs truncate">{coupon.title}</td>
-                    <td className="py-4 px-4">
-                      <code className="bg-gray-100 px-2 py-1 rounded text-sm">
-                        {coupon.code || 'No code'}
-                      </code>
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-semibold text-gray-900 max-w-xs truncate">{coupon.title}</div>
+                      {coupon.description && (
+                        <div className="text-xs text-gray-500 max-w-xs truncate mt-1">{coupon.description}</div>
+                      )}
                     </td>
-                    <td className="py-4 px-4">
-                      <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-sm font-semibold">
-                        {coupon.discount}
-                      </span>
+                    <td className="px-6 py-4">
+                      {coupon.code ? (
+                        <span className="inline-flex items-center px-3 py-1 bg-gray-100 border border-gray-300 text-sm font-mono font-bold text-gray-800">
+                          {coupon.code}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-gray-400">No code</span>
+                      )}
                     </td>
-                    <td className="py-4 px-4 text-sm text-gray-600">
-                      {coupon.expiryDate ? new Date(coupon.expiryDate).toLocaleDateString() : 'No expiry'}
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-semibold text-primary">{coupon.discount}</span>
                     </td>
-                    <td className="py-4 px-4">
-                      <div className="flex justify-end space-x-2">
-                        <button
-                          onClick={() => handleEdit(coupon)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        >
-                          <FiEdit2 size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(coupon.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <FiTrash2 size={18} />
-                        </button>
-                      </div>
+                    <td className="px-6 py-4">
+                      {coupon.exclusive && (
+                        <span className="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold">
+                          EXCLUSIVE
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button
+                        onClick={() => handleEdit(coupon)}
+                        className="text-primary hover:text-primary-dark mr-4 inline-flex items-center gap-1"
+                      >
+                        <FiEdit2 size={16} />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        onClick={() => handleDelete(coupon.id, coupon.title)}
+                        className="text-red-600 hover:text-red-800 inline-flex items-center gap-1"
+                      >
+                        <FiTrash2 size={16} />
+                        <span>Delete</span>
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -231,13 +375,13 @@ export default function CouponsManager() {
             </tbody>
           </table>
         </div>
-      )}
+      </div>
 
-      {/* Add/Edit Modal */}
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+          <div className="bg-white max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between p-6 border-b">
               <h3 className="text-2xl font-bold text-secondary">
                 {editingCoupon ? 'Edit Coupon' : 'Add New Coupon'}
               </h3>
@@ -246,106 +390,173 @@ export default function CouponsManager() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              {/* Store Selection */}
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">Select Store *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Store <span className="text-red-500">*</span>
+                </label>
                 <select
-                  required
+                  name="storeId"
                   value={formData.storeId}
                   onChange={(e) => handleStoreSelect(e.target.value)}
-                  className="input-field"
+                  className={`w-full px-4 py-3 border ${errors.storeId ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
                 >
                   <option value="">Choose a store...</option>
                   {stores.map(store => (
                     <option key={store.id} value={store.id}>{store.name}</option>
                   ))}
                 </select>
+                {errors.storeId && (
+                  <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                    <FiAlertCircle size={14} />
+                    {errors.storeId}
+                  </p>
+                )}
               </div>
 
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2">Coupon Title *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData({...formData, title: e.target.value})}
-                  className="input-field"
-                  placeholder="e.g., Save 20% Off Your Order"
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2">Description *</label>
-                <textarea
-                  required
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="input-field"
-                  rows="3"
-                  placeholder="Describe the coupon offer..."
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-gray-700 font-semibold mb-2">Coupon Code</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Title */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Coupon Title <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border ${errors.title ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+                    placeholder="e.g., Get 50% Off Your Order"
+                  />
+                  {errors.title && (
+                    <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                      <FiAlertCircle size={14} />
+                      {errors.title}
+                    </p>
+                  )}
+                </div>
+
+                {/* Description */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    rows="2"
+                    className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Brief description of the coupon..."
+                  />
+                </div>
+
+                {/* Coupon Code */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Coupon Code</label>
+                  <input
+                    type="text"
+                    name="code"
                     value={formData.code}
-                    onChange={(e) => setFormData({...formData, code: e.target.value.toUpperCase()})}
-                    className="input-field"
-                    placeholder="SAVE20"
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono"
+                    placeholder="e.g., SAVE50"
                   />
-                  <p className="text-sm text-gray-500 mt-1">Leave empty if no code needed</p>
+                  <p className="mt-1 text-xs text-gray-500">Leave empty if no code required</p>
                 </div>
 
+                {/* Discount */}
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-2">Discount Display *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Discount <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
-                    required
+                    name="discount"
                     value={formData.discount}
-                    onChange={(e) => setFormData({...formData, discount: e.target.value})}
-                    className="input-field"
-                    placeholder="20% OFF"
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border ${errors.discount ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+                    placeholder="e.g., 50% Off, $20 Off"
                   />
+                  {errors.discount && (
+                    <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                      <FiAlertCircle size={14} />
+                      {errors.discount}
+                    </p>
+                  )}
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Link */}
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-2">Link URL</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Deal Link</label>
                   <input
-                    type="url"
+                    type="text"
+                    name="link"
                     value={formData.link}
-                    onChange={(e) => setFormData({...formData, link: e.target.value})}
-                    className="input-field"
-                    placeholder="https://store.com/deal"
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border ${errors.link ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+                    placeholder="https://..."
                   />
+                  {errors.link && (
+                    <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                      <FiAlertCircle size={14} />
+                      {errors.link}
+                    </p>
+                  )}
                 </div>
 
+                {/* Expiry Date */}
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-2">Expiry Date</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
                   <input
                     type="date"
+                    name="expiryDate"
                     value={formData.expiryDate}
-                    onChange={(e) => setFormData({...formData, expiryDate: e.target.value})}
-                    className="input-field"
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
+                </div>
+
+                {/* Exclusive */}
+                <div className="md:col-span-2">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      name="exclusive"
+                      checked={formData.exclusive}
+                      onChange={handleInputChange}
+                      className="w-5 h-5 text-primary border-gray-300 focus:ring-primary"
+                    />
+                    <span className="text-sm font-medium text-gray-700">
+                      Mark as Exclusive Deal
+                    </span>
+                  </label>
                 </div>
               </div>
 
-              <div className="flex space-x-3 pt-4">
-                <button type="submit" className="btn-primary flex-1 flex items-center justify-center space-x-2">
-                  <FiSave size={18} />
-                  <span>{editingCoupon ? 'Update Coupon' : 'Create Coupon'}</span>
-                </button>
+              <div className="flex items-center justify-end space-x-4 pt-4 border-t">
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
                 >
                   Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex items-center space-x-2 bg-primary hover:bg-primary-dark text-white px-8 py-3 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {saving ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FiSave size={20} />
+                      <span>{editingCoupon ? 'Update Coupon' : 'Add Coupon'}</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>
@@ -355,4 +566,3 @@ export default function CouponsManager() {
     </div>
   );
 }
-
