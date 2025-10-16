@@ -5,15 +5,21 @@ import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 
 export default function Cashback() {
   const [stores, setStores] = useState([]);
+  const [filteredStores, setFilteredStores] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
   useEffect(() => {
     fetchStores();
   }, []);
 
+  useEffect(() => {
+    filterStores();
+  }, [stores, selectedCategory]);
+
   const fetchStores = async () => {
     try {
-      const q = query(collection(db, 'stores'), orderBy('createdAt', 'desc'), limit(6));
+      const q = query(collection(db, 'stores'), orderBy('createdAt', 'desc'), limit(20));
       const querySnapshot = await getDocs(q);
       const storesData = querySnapshot.docs.map(doc => ({
         id: doc.id,
@@ -25,6 +31,27 @@ export default function Cashback() {
       console.error('Error fetching stores:', error);
       setLoading(false);
     }
+  };
+
+  const filterStores = () => {
+    if (selectedCategory === 'All') {
+      setFilteredStores(stores);
+    } else {
+      const filtered = stores.filter(store => 
+        store.category?.toLowerCase().includes(selectedCategory.toLowerCase()) ||
+        store.name?.toLowerCase().includes(selectedCategory.toLowerCase())
+      );
+      setFilteredStores(filtered);
+    }
+  };
+
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category);
+  };
+
+  const handleShopNow = (storeId, storeName) => {
+    // Simulate opening store in new tab
+    window.open(`https://${storeName.toLowerCase().replace(/\s+/g, '')}.com`, '_blank');
   };
 
   const topStores = [
@@ -73,12 +100,12 @@ export default function Cashback() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-primary font-bold text-lg">{store.cashback}</span>
-                    <Link 
-                      to={`/store/${index + 1}`}
+                    <button 
+                      onClick={() => handleShopNow(index + 1, store.name)}
                       className="bg-primary hover:bg-primary-dark text-white font-bold px-6 py-2 text-sm transition-colors"
                     >
                       SHOP NOW
-                    </Link>
+                    </button>
                   </div>
                 </div>
               ))}
@@ -104,8 +131,9 @@ export default function Cashback() {
                   {categories.map((cat, index) => (
                     <button
                       key={index}
+                      onClick={() => handleCategoryClick(cat)}
                       className={`block w-full text-left px-3 py-2 text-sm transition-colors ${
-                        index === 0 
+                        selectedCategory === cat
                           ? 'bg-primary text-white font-semibold' 
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
@@ -120,7 +148,7 @@ export default function Cashback() {
             {/* Store List */}
             <div className="flex-1">
               <div className="space-y-4">
-                {stores.map((store) => (
+                {filteredStores.map((store) => (
                   <div key={store.id} className="bg-white border border-gray-200 p-6 flex items-center justify-between hover:shadow-md transition-shadow">
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-16 flex items-center justify-center border border-gray-200 p-2">
@@ -139,12 +167,12 @@ export default function Cashback() {
                     </div>
                     <div className="text-right">
                       <p className="text-primary font-bold text-lg mb-2">Up to 10% back</p>
-                      <Link
-                        to={`/store/${store.id}`}
+                      <button
+                        onClick={() => handleShopNow(store.id, store.name)}
                         className="bg-primary hover:bg-primary-dark text-white font-bold px-6 py-2 text-sm transition-colors inline-block"
                       >
                         SHOP NOW
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 ))}

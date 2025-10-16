@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 
 export default function SavingGuides() {
+  const [visibleArticles, setVisibleArticles] = useState(6);
+
   const articles = [
     {
       title: 'Financial Resources and Support For the 2024-25 School Year',
@@ -74,6 +77,15 @@ export default function SavingGuides() {
     }
   ];
 
+  const handleLoadMore = () => {
+    setVisibleArticles(prev => Math.min(prev + 6, articles.length));
+  };
+
+  const handleArticleClick = (article) => {
+    // Store article data in localStorage for detail page
+    localStorage.setItem('currentArticle', JSON.stringify(article));
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -90,10 +102,11 @@ export default function SavingGuides() {
       <div className="bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {articles.map((article, index) => (
+            {articles.slice(0, visibleArticles).map((article, index) => (
               <Link
                 key={index}
                 to={`/article/${index + 1}`}
+                onClick={() => handleArticleClick(article)}
                 className="bg-white border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow group"
               >
                 {/* Real Image */}
@@ -134,11 +147,16 @@ export default function SavingGuides() {
           </div>
 
           {/* Load More Button */}
-          <div className="text-center mt-12">
-            <button className="bg-primary hover:bg-primary-dark text-white font-bold px-8 py-3 transition-colors">
-              Load More Articles
-            </button>
-          </div>
+          {visibleArticles < articles.length && (
+            <div className="text-center mt-12">
+              <button 
+                onClick={handleLoadMore}
+                className="bg-primary hover:bg-primary-dark text-white font-bold px-8 py-3 transition-colors"
+              >
+                Load More Articles ({articles.length - visibleArticles} remaining)
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

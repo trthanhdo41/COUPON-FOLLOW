@@ -8,6 +8,8 @@ import Stores from './pages/Stores';
 import StoreDetail from './pages/StoreDetail';
 import Cashback from './pages/Cashback';
 import SavingGuides from './pages/SavingGuides';
+import ArticleDetail from './pages/ArticleDetail';
+import Search from './pages/Search';
 import SignIn from './pages/SignIn';
 import Join from './pages/Join';
 import AdminLogin from './admin/AdminLogin';
@@ -55,15 +57,31 @@ function App() {
               <Footer />
             </>
           } />
-          <Route path="/saving-guides" element={
-            <>
-              <Navbar />
-              <SavingGuides />
-              <Footer />
-            </>
-          } />
-          
-          {/* Auth Routes */}
+              <Route path="/saving-guides" element={
+                <>
+                  <Navbar />
+                  <SavingGuides />
+                  <Footer />
+                </>
+              } />
+              
+              {/* Search Routes */}
+              <Route path="/search" element={
+                <>
+                  <Navbar />
+                  <Search />
+                  <Footer />
+                </>
+              } />
+              <Route path="/article/:id" element={
+                <>
+                  <Navbar />
+                  <ArticleDetail />
+                  <Footer />
+                </>
+              } />
+              
+              {/* Auth Routes */}
           <Route path="/signin" element={
             <>
               <Navbar />

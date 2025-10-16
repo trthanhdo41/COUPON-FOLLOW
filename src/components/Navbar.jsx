@@ -1,10 +1,19 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FiSearch } from 'react-icons/fi';
 import { useState } from 'react';
 
 export default function Navbar() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+      setSearchTerm('');
+    }
+  };
 
   return (
     <nav className="bg-[#364454] shadow-lg sticky top-0 z-50">
@@ -50,19 +59,19 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Search Bar */}
-          <div className="hidden lg:flex items-center flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              <input
-                type="text"
-                placeholder="Search for a store"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-2.5 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm"
-              />
-            </div>
-          </div>
+              {/* Search Bar */}
+              <div className="hidden lg:flex items-center flex-1 max-w-md mx-8">
+                <form onSubmit={handleSearch} className="relative w-full">
+                  <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                  <input
+                    type="text"
+                    placeholder="Search for a store"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-12 pr-4 py-2.5 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm"
+                  />
+                </form>
+              </div>
 
           {/* Sign In / Join Buttons */}
           <div className="flex items-center space-x-4 flex-shrink-0">
@@ -103,15 +112,15 @@ export default function Navbar() {
             <Link to="/stores" className="block px-3 py-2 text-base font-medium text-white hover:bg-primary">Stores</Link>
             <Link to="/cashback" className="block px-3 py-2 text-base font-medium text-white hover:bg-primary">Cashback</Link>
             <Link to="/saving-guides" className="block px-3 py-2 text-base font-medium text-white hover:bg-primary">Saving Guides</Link>
-            <div className="px-3 py-2">
-              <input
-                type="text"
-                placeholder="Search for a store"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-4 pr-4 py-2 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-              />
-            </div>
+                <form onSubmit={handleSearch} className="px-3 py-2">
+                  <input
+                    type="text"
+                    placeholder="Search for a store"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-4 pr-4 py-2 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                  />
+                </form>
             <Link to="/signin" className="block px-3 py-2 text-base font-medium text-white hover:bg-primary">Sign In</Link>
             <Link to="/join" className="block px-3 py-2 text-base font-medium text-white hover:bg-primary">Join</Link>
             <Link to="/admin/login" className="block px-3 py-2 text-base font-medium text-white hover:bg-primary">Admin Login</Link>
