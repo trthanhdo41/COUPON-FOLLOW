@@ -1,0 +1,352 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;600;700;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f7fa;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #2c3e50;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Featured Deal Card - Curve on right side */
+.featured-deal-card {
+  border-top-right-radius: 150px;
+  border-bottom-right-radius: 150px;
+}
+
+/* FAQ Dropdown Styles */
+details summary {
+  list-style: none;
+}
+
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details[open] summary ~ * {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Swiper Custom Styles - CouponFollow Style */
+.top-coupons-swiper {
+  padding: 20px 0 60px 0;
+}
+
+.swiper-pagination-custom {
+  position: relative !important;
+  bottom: auto !important;
+}
+
+.swiper-pagination-custom .swiper-pagination-bullet {
+  width: 10px;
+  height: 10px;
+  background: #cbd5e1;
+  opacity: 1;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  margin: 0 4px !important;
+}
+
+.swiper-pagination-custom .swiper-pagination-bullet-active {
+  background: #00a896;
+  width: 10px;
+  height: 10px;
+  transform: scale(1.3);
+}
+
+.swiper-pagination-custom .swiper-pagination-bullet:hover {
+  background: #00a896;
+  opacity: 0.7;
+}
+
+/* CouponFollow Style - Trending Offer Card (HORIZONTAL LAYOUT) */
+.trending-offer {
+  display: flex;
+  align-items: center;
+  background: #f8fafb;
+  border: 1px solid #e2e8f0;
+  border-radius: 0;
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  padding: 20px;
+  gap: 24px;
+}
+
+.trending-offer:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-color: #cbd5e0;
+}
+
+/* Left Section - Logo (Square) */
+.trending-offer .short-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.trending-offer .logo {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0;
+  padding: 10px;
+}
+
+/* Badge Section - SAVE WITH CODE */
+.trending-offer .tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.trending-offer .tile .big {
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 2px;
+  color: #0891b2;
+  text-transform: uppercase;
+}
+
+.trending-offer .tile .small {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  margin-bottom: 8px;
+  color: #0891b2;
+}
+
+.trending-offer .tile .deal-type {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Middle Section - Content */
+.trending-offer .deal-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  gap: 24px;
+}
+
+.trending-offer .info {
+  flex: 1;
+}
+
+.trending-offer .title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0891b2;
+  margin-bottom: 8px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.trending-offer .description {
+  font-size: 15px;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Right Section - Button + Link */
+.trending-offer .right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 180px;
+  flex-shrink: 0;
+}
+
+.trending-offer .btn-reveal {
+  position: relative;
+  width: 180px;
+  height: 52px;
+  border-radius: 0;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  background: #0891b2;
+  border: 2px dashed #0891b2;
+}
+
+.trending-offer .btn-reveal .code {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #2c3e50;
+  letter-spacing: 1px;
+  font-family: 'Courier New', monospace;
+  background: #fff;
+  z-index: 1;
+}
+
+.trending-offer .btn-reveal .cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0891b2;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 2;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.trending-offer .btn-reveal:hover .cover {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.trending-offer .merchant {
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 400;
+  text-align: center;
+}
+
+.trending-offer .merchant-name {
+  color: #0891b2;
+  text-decoration: underline;
+  font-weight: 400;
+}
+
+.trending-offer .merchant-name:hover {
+  color: #0891b2;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .trending-offer {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .trending-offer .short-info {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .trending-offer .tile {
+    min-width: auto;
+  }
+  
+  .trending-offer .deal-content {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 16px;
+  }
+  
+  .trending-offer .info {
+    margin-bottom: 0;
+  }
+  
+  .trending-offer .right {
+    align-items: center;
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .trending-offer .btn-reveal {
+    width: 100%;
+  }
+  
+  .trending-offer .merchant {
+    text-align: center;
+  }
+}
+
+/* Custom Utilities */
+@layer utilities {
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-primary border-2 border-primary hover:bg-primary hover:text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-6 border border-gray-100;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all;
+  }
+}
