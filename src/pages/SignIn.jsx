@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FaGoogle, FaFacebook, FaApple } from 'react-icons/fa';
+import { FiUserCheck, FiShield, FiLock } from 'react-icons/fi';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
@@ -33,9 +34,24 @@ export default function SignIn() {
         {/* Left Side - Illustration */}
         <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary to-primary-dark items-center justify-center p-12">
           <div className="text-center">
-            <div className="text-9xl mb-6">😊</div>
+            <div className="mb-8 flex justify-center">
+              <div className="relative">
+                <div className="absolute inset-0 bg-white/20 rounded-full blur-2xl"></div>
+                <FiShield className="relative text-white" size={120} strokeWidth={1.5} />
+              </div>
+            </div>
             <h2 className="text-3xl font-bold text-white mb-4">Welcome Back!</h2>
-            <p className="text-white text-lg">Sign in to access exclusive deals and cashback offers</p>
+            <p className="text-white text-lg mb-6">Sign in to access exclusive deals and cashback offers</p>
+            <div className="flex justify-center gap-8 mt-8">
+              <div className="text-center">
+                <FiUserCheck className="mx-auto text-white mb-2" size={32} />
+                <p className="text-white text-sm">Secure Login</p>
+              </div>
+              <div className="text-center">
+                <FiLock className="mx-auto text-white mb-2" size={32} />
+                <p className="text-white text-sm">Protected</p>
+              </div>
+            </div>
           </div>
         </div>
 

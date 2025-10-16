@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FaGoogle, FaFacebook, FaApple } from 'react-icons/fa';
+import { FiUsers, FiGift, FiTrendingUp, FiStar } from 'react-icons/fi';
 
 export default function Join() {
   const [email, setEmail] = useState('');
@@ -52,9 +53,28 @@ export default function Join() {
         {/* Left Side - Illustration */}
         <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary to-primary-dark items-center justify-center p-12">
           <div className="text-center">
-            <div className="text-9xl mb-6">😎</div>
+            <div className="mb-8 flex justify-center">
+              <div className="relative">
+                <div className="absolute inset-0 bg-white/20 rounded-full blur-2xl"></div>
+                <FiUsers className="relative text-white" size={120} strokeWidth={1.5} />
+              </div>
+            </div>
             <h2 className="text-3xl font-bold text-white mb-4">Join CouponFollow</h2>
-            <p className="text-white text-lg mb-2">Earn cashback and get exclusive codes!</p>
+            <p className="text-white text-lg mb-8">Earn cashback and get exclusive codes!</p>
+            <div className="grid grid-cols-3 gap-4 mt-8">
+              <div className="text-center">
+                <FiGift className="mx-auto text-white mb-2" size={28} />
+                <p className="text-white text-xs">Exclusive Deals</p>
+              </div>
+              <div className="text-center">
+                <FiTrendingUp className="mx-auto text-white mb-2" size={28} />
+                <p className="text-white text-xs">Cashback</p>
+              </div>
+              <div className="text-center">
+                <FiStar className="mx-auto text-white mb-2" size={28} />
+                <p className="text-white text-xs">VIP Access</p>
+              </div>
+            </div>
           </div>
         </div>
 
