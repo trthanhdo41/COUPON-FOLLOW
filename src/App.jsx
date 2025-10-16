@@ -13,6 +13,9 @@ import ArticleDetail from './pages/ArticleDetail';
 import Search from './pages/Search';
 import SignIn from './pages/SignIn';
 import Join from './pages/Join';
+import UserDashboard from './pages/UserDashboard';
+import TermsOfUse from './pages/TermsOfUse';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import AdminLogin from './admin/AdminLogin';
 import AdminDashboard from './admin/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -79,6 +82,31 @@ function App() {
                 <>
                   <Navbar />
                   <ArticleDetail />
+                  <Footer />
+                </>
+              } />
+              
+              {/* User Dashboard */}
+              <Route path="/dashboard" element={
+                <>
+                  <Navbar />
+                  <UserDashboard />
+                  <Footer />
+                </>
+              } />
+              
+              {/* Legal Pages */}
+              <Route path="/terms" element={
+                <>
+                  <Navbar />
+                  <TermsOfUse />
+                  <Footer />
+                </>
+              } />
+              <Route path="/privacy" element={
+                <>
+                  <Navbar />
+                  <PrivacyPolicy />
                   <Footer />
                 </>
               } />

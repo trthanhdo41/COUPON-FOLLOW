@@ -55,12 +55,42 @@ export default function Cashback() {
   };
 
   const topStores = [
-    { name: 'Trip.com', cashback: 'Up to 7% back', category: 'Travel' },
-    { name: 'AliExpress', cashback: 'Up to 21% back', category: 'Shopping' },
-    { name: 'AT&T', cashback: 'Up to 7% back', category: 'Tech' },
-    { name: 'American Eagle', cashback: 'Up to 8% back', category: 'Fashion' },
-    { name: 'Macy\'s', cashback: 'Up to 5% back', category: 'Department' },
-    { name: 'Old Navy', cashback: 'Up to 2.5% back', category: 'Fashion' }
+    { 
+      name: 'Trip.com', 
+      cashback: 'Up to 7% back', 
+      category: 'Travel',
+      logo: 'https://logos-world.net/wp-content/uploads/2021/02/Trip-com-Logo.png'
+    },
+    { 
+      name: 'AliExpress', 
+      cashback: 'Up to 21% back', 
+      category: 'Shopping',
+      logo: 'https://logos-world.net/wp-content/uploads/2020/09/AliExpress-Logo.png'
+    },
+    { 
+      name: 'AT&T', 
+      cashback: 'Up to 7% back', 
+      category: 'Tech',
+      logo: 'https://logos-world.net/wp-content/uploads/2020/09/ATT-Logo.png'
+    },
+    { 
+      name: 'American Eagle', 
+      cashback: 'Up to 8% back', 
+      category: 'Fashion',
+      logo: 'https://logos-world.net/wp-content/uploads/2020/09/American-Eagle-Logo.png'
+    },
+    { 
+      name: 'Macy\'s', 
+      cashback: 'Up to 5% back', 
+      category: 'Department',
+      logo: 'https://logos-world.net/wp-content/uploads/2020/09/Macys-Logo.png'
+    },
+    { 
+      name: 'Old Navy', 
+      cashback: 'Up to 2.5% back', 
+      category: 'Fashion',
+      logo: 'https://logos-world.net/wp-content/uploads/2020/09/Old-Navy-Logo.png'
+    }
   ];
 
   const categories = [
@@ -90,8 +120,19 @@ export default function Cashback() {
               {topStores.map((store, index) => (
                 <div key={index} className="bg-white border border-gray-200 p-6 hover:shadow-lg transition-all">
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="w-16 h-16 bg-gray-100 border border-gray-200 flex items-center justify-center">
-                      <span className="text-2xl font-bold text-gray-400">{store.name.charAt(0)}</span>
+                    <div className="w-16 h-16 bg-white border border-gray-200 flex items-center justify-center p-2">
+                      <img 
+                        src={store.logo} 
+                        alt={store.name}
+                        className="max-w-full max-h-full object-contain"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center" style={{display: 'none'}}>
+                        <span className="text-2xl font-bold text-gray-400">{store.name.charAt(0)}</span>
+                      </div>
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-lg text-[#2c3e50] mb-1">{store.name}</h3>
