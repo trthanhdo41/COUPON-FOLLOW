@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { db } from '../firebase';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { FiTag } from 'react-icons/fi';
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { FiTag, FiCopy, FiCheck } from 'react-icons/fi';
 
 export default function Coupons() {
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [revealedCodes, setRevealedCodes] = useState(new Set());
+  const [copiedCode, setCopiedCode] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     fetchCoupons();
@@ -32,6 +35,23 @@ export default function Coupons() {
   const handleRevealCode = (couponId) => {
     setRevealedCodes(prev => new Set([...prev, couponId]));
   };
+
+  const handleCopyCode = (code, couponId) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(couponId);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Calculate pagination
+  const totalPages = Math.ceil(coupons.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentCoupons = coupons.slice(startIndex, endIndex);
 
   return (
     <div className="min-h-screen bg-white">
@@ -58,7 +78,7 @@ export default function Coupons() {
           </div>
         ) : (
           <div className="space-y-4">
-            {coupons.map((coupon) => (
+            {currentCoupons.map((coupon) => (
               <div 
                 key={coupon.id} 
                 className="bg-white border border-gray-200 hover:shadow-md transition-shadow"
@@ -107,6 +127,22 @@ export default function Coupons() {
                             <span className="font-bold text-lg text-[#2c3e50] font-mono">
                               {coupon.code}
                             </span>
+                            <button
+                              onClick={() => handleCopyCode(coupon.code, coupon.id)}
+                              className="mt-2 w-full bg-[#0891b2] hover:bg-[#0e7490] text-white font-bold px-3 py-2 transition-colors text-xs flex items-center justify-center gap-1"
+                            >
+                              {copiedCode === coupon.id ? (
+                                <>
+                                  <FiCheck size={14} />
+                                  Copied!
+                                </>
+                              ) : (
+                                <>
+                                  <FiCopy size={14} />
+                                  Copy Code
+                                </>
+                              )}
+                            </button>
                           </div>
                         ) : (
                           <button
@@ -137,24 +173,58 @@ export default function Coupons() {
         {/* Pagination */}
         {!loading && coupons.length > 0 && (
           <div className="flex items-center justify-center gap-2 mt-8">
-            <button className="w-10 h-10 flex items-center justify-center bg-primary text-white font-bold hover:bg-primary-dark transition-colors">
-              1
+            {/* Previous Button */}
+            <button 
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="w-10 h-10 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ‹
             </button>
-            <button className="w-10 h-10 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors">
-              2
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors">
-              3
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors">
-              4
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors">
-              5
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors">
+
+            {/* Page Numbers */}
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = currentPage - 2 + i;
+              }
+
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`w-10 h-10 flex items-center justify-center font-bold transition-colors ${
+                    currentPage === pageNum
+                      ? 'bg-primary text-white'
+                      : 'border border-gray-300 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+
+            {/* Next Button */}
+            <button 
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="w-10 h-10 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               ›
             </button>
+          </div>
+        )}
+
+        {/* Results Info */}
+        {!loading && coupons.length > 0 && (
+          <div className="text-center text-gray-500 mt-4">
+            Showing {startIndex + 1}-{Math.min(endIndex, coupons.length)} of {coupons.length} coupons
           </div>
         )}
       </div>

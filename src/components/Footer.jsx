@@ -1,10 +1,62 @@
 import { Link } from 'react-router-dom';
 import { FaFacebook, FaTwitter } from 'react-icons/fa';
+import { useState } from 'react';
 
 export default function Footer() {
+  const [email, setEmail] = useState('');
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+
+    setIsLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsSubscribed(true);
+      setIsLoading(false);
+      setEmail('');
+    }, 1000);
+  };
+
   return (
     <footer className="bg-[#2c3e50] text-gray-300 pt-12 pb-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Newsletter Section */}
+        <div className="bg-primary/10 border border-primary/20 rounded-lg p-6 mb-8">
+          <div className="text-center">
+            <h3 className="text-white font-bold text-xl mb-2">Get the Best Deals First!</h3>
+            <p className="text-gray-300 mb-4">Subscribe to our newsletter and never miss out on exclusive coupons and cashback offers.</p>
+            
+            {!isSubscribed ? (
+              <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  className="flex-1 px-4 py-3 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="bg-primary hover:bg-primary-dark text-white font-bold px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? 'Subscribing...' : 'Subscribe'}
+                </button>
+              </form>
+            ) : (
+              <div className="text-center">
+                <div className="text-green-400 text-4xl mb-2">✓</div>
+                <p className="text-white font-semibold">Thank you for subscribing!</p>
+                <p className="text-gray-300 text-sm">You'll receive our best deals in your inbox.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-8">
           {/* Logo & Country Selector */}
           <div>

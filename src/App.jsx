@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import CookieConsent from './components/CookieConsent';
 import Home from './pages/Home';
 import Coupons from './pages/Coupons';
 import Stores from './pages/Stores';
@@ -20,6 +21,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <CookieConsent />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={
