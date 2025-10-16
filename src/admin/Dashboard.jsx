@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
-import { FiTag, FiShoppingBag, FiTrendingUp, FiDollarSign } from 'react-icons/fi';
+import { FiTag, FiShoppingBag, FiTrendingUp, FiDollarSign, FiFolder, FiBarChart2 } from 'react-icons/fi';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -20,10 +21,12 @@ export default function Dashboard() {
     try {
       const couponsSnapshot = await getDocs(collection(db, 'coupons'));
       const storesSnapshot = await getDocs(collection(db, 'stores'));
+      const categoriesSnapshot = await getDocs(collection(db, 'categories'));
       
       setStats({
         totalCoupons: couponsSnapshot.size,
         totalStores: storesSnapshot.size,
+        totalCategories: categoriesSnapshot.size,
         activeCoupons: couponsSnapshot.size,
         totalSavings: couponsSnapshot.size * 50 // Mock calculation
       });
@@ -100,31 +103,50 @@ export default function Dashboard() {
       {/* Quick Actions */}
       <div className="card">
         <h3 className="text-xl font-bold text-secondary mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <a
-            href="/admin/coupons"
-            className="flex items-center space-x-4 p-4 border-2 border-gray-200 rounded-lg hover:border-primary transition-all"
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link
+            to="/admin/coupons"
+            className="flex flex-col items-center text-center p-6 border-2 border-gray-200 hover:border-primary hover:shadow-md transition-all group"
           >
-            <div className="bg-primary text-white p-3 rounded-lg">
-              <FiTag size={24} />
+            <div className="bg-primary group-hover:bg-primary-dark text-white p-4 mb-3 transition-colors">
+              <FiTag size={28} />
             </div>
-            <div>
-              <h4 className="font-bold text-secondary">Add New Coupon</h4>
-              <p className="text-gray-500 text-sm">Create a new coupon code</p>
-            </div>
-          </a>
-          <a
-            href="/admin/stores"
-            className="flex items-center space-x-4 p-4 border-2 border-gray-200 rounded-lg hover:border-primary transition-all"
+            <h4 className="font-bold text-secondary mb-1">Coupons</h4>
+            <p className="text-gray-500 text-xs">Manage all coupons</p>
+          </Link>
+          
+          <Link
+            to="/admin/stores"
+            className="flex flex-col items-center text-center p-6 border-2 border-gray-200 hover:border-primary hover:shadow-md transition-all group"
           >
-            <div className="bg-green-500 text-white p-3 rounded-lg">
-              <FiShoppingBag size={24} />
+            <div className="bg-green-500 group-hover:bg-green-600 text-white p-4 mb-3 transition-colors">
+              <FiShoppingBag size={28} />
             </div>
-            <div>
-              <h4 className="font-bold text-secondary">Add New Store</h4>
-              <p className="text-gray-500 text-sm">Register a new merchant</p>
+            <h4 className="font-bold text-secondary mb-1">Stores</h4>
+            <p className="text-gray-500 text-xs">Manage merchants</p>
+          </Link>
+          
+          <Link
+            to="/admin/categories"
+            className="flex flex-col items-center text-center p-6 border-2 border-gray-200 hover:border-primary hover:shadow-md transition-all group"
+          >
+            <div className="bg-purple-500 group-hover:bg-purple-600 text-white p-4 mb-3 transition-colors">
+              <FiFolder size={28} />
             </div>
-          </a>
+            <h4 className="font-bold text-secondary mb-1">Categories</h4>
+            <p className="text-gray-500 text-xs">Organize content</p>
+          </Link>
+          
+          <Link
+            to="/admin/analytics"
+            className="flex flex-col items-center text-center p-6 border-2 border-gray-200 hover:border-primary hover:shadow-md transition-all group"
+          >
+            <div className="bg-orange-500 group-hover:bg-orange-600 text-white p-4 mb-3 transition-colors">
+              <FiBarChart2 size={28} />
+            </div>
+            <h4 className="font-bold text-secondary mb-1">Analytics</h4>
+            <p className="text-gray-500 text-xs">View insights</p>
+          </Link>
         </div>
       </div>
     </div>

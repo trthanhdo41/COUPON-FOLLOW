@@ -1,15 +1,18 @@
 import { useState } from 'react';
-import { Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { FiHome, FiTag, FiShoppingBag, FiLogOut, FiMenu, FiX } from 'react-icons/fi';
+import { FiHome, FiTag, FiShoppingBag, FiLogOut, FiMenu, FiX, FiFolder, FiBarChart2 } from 'react-icons/fi';
 import CouponsManager from './CouponsManager';
 import StoresManager from './StoresManager';
+import CategoriesManager from './CategoriesManager';
+import AnalyticsManager from './AnalyticsManager';
 import Dashboard from './Dashboard';
 
 export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -22,8 +25,10 @@ export default function AdminDashboard() {
 
   const menuItems = [
     { path: '/admin/dashboard', icon: FiHome, label: 'Dashboard' },
-    { path: '/admin/coupons', icon: FiTag, label: 'Manage Coupons' },
-    { path: '/admin/stores', icon: FiShoppingBag, label: 'Manage Stores' },
+    { path: '/admin/coupons', icon: FiTag, label: 'Coupons' },
+    { path: '/admin/stores', icon: FiShoppingBag, label: 'Stores' },
+    { path: '/admin/categories', icon: FiFolder, label: 'Categories' },
+    { path: '/admin/analytics', icon: FiBarChart2, label: 'Analytics' },
   ];
 
   return (
@@ -51,17 +56,24 @@ export default function AdminDashboard() {
 
           {/* Menu Items */}
           <nav className="flex-1 px-4 py-6 space-y-2">
-            {menuItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setSidebarOpen(false)}
-                className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-primary transition-colors"
-              >
-                <item.icon size={20} />
-                <span className="font-medium">{item.label}</span>
-              </Link>
-            ))}
+            {menuItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center space-x-3 px-4 py-3 transition-colors ${
+                    isActive 
+                      ? 'bg-primary text-white' 
+                      : 'hover:bg-primary/80 hover:text-white'
+                  }`}
+                >
+                  <item.icon size={20} />
+                  <span className="font-medium">{item.label}</span>
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Logout Button */}
@@ -102,12 +114,14 @@ export default function AdminDashboard() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-4 md:p-6">
           <Routes>
             <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/coupons" element={<CouponsManager />} />
             <Route path="/stores" element={<StoresManager />} />
+            <Route path="/categories" element={<CategoriesManager />} />
+            <Route path="/analytics" element={<AnalyticsManager />} />
           </Routes>
         </main>
       </div>
